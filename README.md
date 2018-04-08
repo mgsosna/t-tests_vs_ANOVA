@@ -1,2 +1,2 @@
-# t-tests_vs_ANOVA
-Visualizations of the danger of multiple t-test comparisons
+# Visualizing the danger of multiple t-test comparisons
+
