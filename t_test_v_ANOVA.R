@@ -19,7 +19,7 @@ install.packages('scales')
 #   o Perform an ANOVA on all groups and record the p-value
 #   o Do this n_iter times to form a distribution
 
-false_pos<- function(n_groups = 3, n_obs = 10, n_iter = 1000, figure = T, 
+false_pos <- function(n_groups = 3, n_obs = 10, n_iter = 1000, figure = T, 
                      verbose = T, pretty = T){
    
    # Create empty variables to store data
