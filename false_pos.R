@@ -167,8 +167,8 @@ for(i in 1:length(range_n_groups)){
    
 }
 
-##################################################################################################
-# Plot parameter scan output
+#---------------------------------------------------------------------------------------------
+#Now actually plot it
 library(lattice)
 library(RColorBrewer)
 library(gridExtra)
@@ -206,8 +206,50 @@ abline(v = 0.05, lty = 2, lwd = 2)
 
 # Number of groups versus p-value
 plot(NA, xlim = range(range_n_groups), ylim = c(0.045, 0.055), xlab = "Number of groups",
-     ylab = "Mean false positive rate", main = "Number of groups vs.\n mean ANOVA false positive rate", 
-     cex.main = 1.4, cex.lab = 1.3, font.lab = 2, font.axis = 2)
+     ylab = "Mean false positive rate", cex.main = 1.4, cex.lab = 1.3, 
+     main = "Number of groups vs.\n mean ANOVA false positive rate", 
+      font.lab = 2, font.axis = 2)
 abline(h = 0.05, lty = 2, lwd = 2)
 points(range_n_groups, apply(anova_vals, 1, mean), cex = 2.5, pch = 19, col = "forestgreen")
 points(range_n_groups, apply(anova_vals, 1, mean), cex = 2.5)
+
+#################################################################################################
+# p = 0.01 ANOVA visualization
+
+# Set values of interest for n_obs and n_groups
+range_n_obs2 <- c(5, 10, 25, 50, 100, 250, 500)
+range_n_groups2 <- 3
+
+# Create empty matrices to store t-test and ANOVA p-values
+anova_vals2 <- matrix(NA, nrow = length(range_n_groups2), ncol = length(range_n_obs2))
+
+# Label the rows and columns
+rownames(anova_vals2) <- range_n_groups2
+colnames(anova_vals2) <- range_n_obs2
+
+#-------------------------------------------------------------------------------------------
+# For each number of groups
+for(i in 1:length(range_n_groups2)){
+   
+   # For each number of observations
+   for(j in 1:length(range_n_obs2)){
+      
+      # Print the values we're running
+      cat("Processing: N groups =", range_n_groups2[i], "| N observations =", range_n_obs2[j])
+      
+      # Run the comparison
+      values <- false_pos(n_groups = range_n_groups2[i], n_obs = range_n_obs2[j], p.val = 0.01,
+                          verbose = F, figure = F, pretty = F, n_iter = 10000)[['Prop_iter_p<0.01']]
+      
+      # Save the values
+      anova_vals2[i, j] <- values$ANOVA
+      
+   }
+   
+}
+
+# Plot it
+plot(density(anova_vals2), col = "forestgreen", lwd = 3, xlab = "False positive rate", 
+     font.lab = 2, main = "ANOVA false positive rate\np = 0.01", cex.main = 1.4, cex.lab = 1.3, 
+     font.axis = 2)
+abline(v = 0.01, lty = 2, lwd = 2)
