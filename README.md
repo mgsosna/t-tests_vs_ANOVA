@@ -45,7 +45,7 @@ Above, we see the distribution of p-values for running multiple t-tests (gray) a
 ### 3.2 Changing number of observations and groups
 What if we change the number of observations or the number of groups? On one hand, increasing the number of comparisons should increase the t-test false positive rate. But what if we have more data per group? If we have a better picture of the parent population each sample comes from, will the t-test get better at recognizing that the samples are coming from the same place? 
 
-To answer these questions, we can run set ranges on `n_obs` and `n_groups`, then run `false_pos` on each combination of the number of groups and observations per group. This will let us know the relative contribution of making more comparisons versus having more data per group. When we do this, we get the heat map below.
+To answer these questions, we can run set ranges on `n_obs` and `n_groups`, then run `false_pos` on each combination of the number of groups and observations per group. This will let us know the relative contribution of making more comparisons versus having more data per group. When we do this, we get the heat maps below.
 
 ![](https://i.imgur.com/2WEeQxj.png)
 
@@ -62,7 +62,7 @@ When we set a threshold of p=0.05, we are accepting the fact that there is a 5% 
 
 ![](https://i.imgur.com/SCG4gCe.png)
 
-And to answer our original question, **yes, the Dutch apparently *are* the world's tallest people.** [Here](http://www.bbc.com/news/science-environment-36888541) is a summary from BBC on [this article](https://elifesciences.org/articles/13410).
+And to answer our original question, **yes, the Dutch apparently *are* the world's tallest people!** [Here](http://www.bbc.com/news/science-environment-36888541) is a summary from BBC on [this article](https://elifesciences.org/articles/13410).
 
 Finally, if you made it this far into the post, enjoy [this xkcd comic](https://xkcd.com/882/) by Randall Monroe, which perfectly describes the problem I tackled here. :-)
 
@@ -73,7 +73,7 @@ Finally, if you made it this far into the post, enjoy [this xkcd comic](https://
 ```r
 population <- rnorm(1e6)
 for(k in 1:n_groups){
-    groups[k] <- sample(population, n_obs)
+    groups[[k]] <- sample(population, n_obs)
 }
 ```
 2. You could remove one for loop in the function by generating `n_obs` * `n_groups` random values, then allocating the values into the groups. However, I wanted to emphasize that each group is a separate dataset whose parent populations have equal means. 
