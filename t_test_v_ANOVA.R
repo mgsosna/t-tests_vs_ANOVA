@@ -123,13 +123,13 @@ false_pos <- function(n_groups = 3, n_obs = 10, n_iter = 1000, figure = T,
 false_pos()
 
 # 100x n_obs: negligible decrease in false positive rate
-false_pos(n_obs = 1000, n_pop = 3)
+false_pos(n_obs = 1000)
 
 # 3x n_pop: ~3x increase in false positive rate
-false_pos(n_pop = 6, n_obs = 10)
+false_pos(n_groups = 6)
 
-# Competing effects: n_pop wins
-false_pos(n_pop = 6, n_obs = 1000)
+# Competing effects: n_groups wins
+false_pos(n_groups = 6, n_obs = 1000)
 
 ####################################################################################################
 # Parameter scan
@@ -142,8 +142,8 @@ range_n_groups <- 3:10
 t_test_vals <- anova_vals <- matrix(NA, nrow = length(range_n_groups), ncol = length(range_n_obs))
 
 # Label the rows and columns
-rownames(t_test_vals3) <- rownames(anova_vals3) <- range_n_groups3
-colnames(t_test_vals3) <- colnames(anova_vals3) <- range_n_obs3
+rownames(t_test_vals) <- rownames(anova_vals) <- range_n_groups
+colnames(t_test_vals) <- colnames(anova_vals) <- range_n_obs
 
 #-------------------------------------------------------------------------------------------
 # For each number of groups
