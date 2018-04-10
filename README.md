@@ -1,7 +1,7 @@
 # [UNDER CONSTRUCTION]
 # Visualizing the danger of multiple t-test comparisons
 ## 1. Abstract
-This repository contains a function, `false_pos`, for quantifying the false positive error rate with multiple t-tests. For a given number of groups and observations per group, the function creates `n_groups` samples from the same (Gaussian) parent distribution, each with `n_obs` observations. Because these samples are drawn from the same population, any differences between them should not be statistically significant (i.e. p > 0.05). 
+This repository contains a function, [false_pos](.../mmgrobis/t-tests_vs_ANOVA/false_pos.R), for quantifying the false positive error rate with multiple t-tests. For a given number of groups and observations per group, the function creates `n_groups` samples from the same (Gaussian) parent distribution, each with `n_obs` observations. Because these samples are drawn from the same population, any differences between them should not be statistically significant (i.e. p > 0.05). 
 
 The function then performs an ANOVA and all possible pairwise t-tests. The lowest pairwise t-test p-value and the ANOVA p-value are recorded. This is done `n_iter` times to form distributions of p-values for t-tests and ANOVAs, which are then plotted if `figure = T`. If `pretty = T`, the proportion of iterations with p-values below 0.05 is printed; otherwise, a list is returned with summary statistics.
 
@@ -9,6 +9,7 @@ The functional arguments are listed below:
 * `n_groups`: the number of groups in the comparison
 * `n_obs`: the number of observations per group
 * `n_iter`: the number of iterations for creating the distribution of p-values
+* `p.val`: the p-value to use when calculating the false positive rate (i.e. percent iterations below this value)
 * `figure`: should a figure be printed?
 * `pretty`: should the output be simple (pretty = T) or thorough (pretty = F)?
 * `verbose`: as the function is running, should the progress be printed?
@@ -41,17 +42,30 @@ We can use our custom function `false_pos` to easily visualize the problems of r
 Above, we see the distribution of p-values for running multiple t-tests (gray) and the ANOVA (blue). For this run, `false_pos` tells us that running multiple t-tests gives you a false positive rate of 11.4%, whereas the ANOVA is 4.8%. We should expect a false positive rate of about 5%, which we get with ANOVA, but we have more than double the error rate with multiple t-tests.
 
 ### 3.2 Changing number of observations and groups
-What if we change the number of observations or the number of groups? On the one hand, we should expect to increase the t-test false positive rate when we increase the number of comparisons. But what if we have more data per group? If we have a better picture of the parent population each sample comes from, will the t-test get better at recognizing that the samples are coming from the same place? 
+What if we change the number of observations or the number of groups? On one hand, increasing the number of comparisons should increase the t-test false positive rate. But what if we have more data per group? If we have a better picture of the parent population each sample comes from, will the t-test get better at recognizing that the samples are coming from the same place? 
 
 To answer these questions, we can run set ranges on `n_obs` and `n_groups`, then run `false_pos` on each combination of the number of groups and observations per group. This will let us know the relative contribution of making more comparisons versus having more data per group. When we do this, we get the heat map below.
 
 ![](https://i.imgur.com/2WEeQxj.png)
 
-As we can see, t-tests are incredibly sensitive to the number of comparisons you run. As you move to the right of the figure (increasing the number of groups), the false error rate steadily rises until you have around a 70% false error rate when comparing 10 groups. Somewhat surprisingly, increasing the number of observations per group does almost nothing to lower the error rate.
+As we can see, t-tests are incredibly sensitive to the number of comparisons you run. As you move to the right of the figure (increasing the number of groups), the false error rate steadily rises until you have around a 70% false error rate when comparing 10 groups. Somewhat surprisingly, increasing the number of observations per group does almost nothing to lower the error rate. A strange exception exists for `n_obs` = 2, maybe corresponding to the fact that any differences between the groups are overriden by how low the sample size is, producing a low test statistic and hence high p-value. The [equations](https://www.statsdirect.co.uk/help/parametric_methods/utt.htm) for the t-test are helpful for wrapping your head around this.  
 
-Meanwhile, ANOVAs are resilient: no matter the number of observations or groups, the false error rate hovers around 0.05, where it should be.
+Meanwhile, the story is much simpler for ANOVAs: they are resilient. No matter the number of observations or groups, the false error rate hovers around 0.05, exactly where we set our p-value threshold. This makes sense: **wherever we set our threshold, we should expect this percentage of errors.** (More on this in the Conclusions.) Below, we can see that the distribution of ANOVA p-values below 0.05 values lies neatly at 5%, as well as the mean false positive rate as a function of group size.
+
+![](https://i.imgur.com/b5bf7iU.png)
 
 ## 4. Conclusions
+This post demonstrates how performing multiple t-tests between identical groups will produce high false positive rates, whereas ANOVAs successfully maintain accuracy. Note that all an ANOVA is doing is asking whether *any* of the groups being compared have parent populations with different means. Once we've run an ANOVA and determined that there *are* height differences between the Dutch, French, and Swedish, we would then need to use a follow-up method such as [Tukey's method](https://support.minitab.com/en-us/minitab/18/help-and-how-to/modeling-statistics/anova/supporting-topics/multiple-comparisons/what-is-tukey-s-method/) or the [Bonferroni's correction](http://mathworld.wolfram.com/BonferroniCorrection.html).
+
+When we set a threshold of p=0.05, we are accepting the fact that there is a 5% chance we reject our null hypothesis even if it is true. In other words, we would claim that the average Dutch person is taller than the average Swedish or French person, even if they aren't. We can run our analysis again 
+
+
+(In fields such as medicine, the accepted p-value threshold is 
+
+
+
+Finally, if you made it this far into the post and are still confused, [this xkcd comic](https://xkcd.com/882/) by Randall Monroe perfectly describes the problem I tackled here. :-)
+
 
 ## 5. Notes
 1. We use `rnorm` to create each group. The parent population here is infinite. An alternate approach is to create a population that is then sampled from, e.g. the code below. However, this approach is slower, as the population needs to be stored in memory (and if you want to be thorough, a new population needs to be created with every iteration). Also, it becomes a little tedious to write the code to sample without replacement; it's simpler to sample with replacement, but then as you increase `n_obs`, each group begins to represent a substantial percent of the parent population, and the groups begin to have many overlapping values. This then decreases the false error rate because it's literally the same numbers in both groups.
