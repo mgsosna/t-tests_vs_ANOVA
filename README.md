@@ -13,6 +13,8 @@ The functional arguments are listed below:
 * `figure`: should a figure be printed?
 * `pretty`: should the output be simple (pretty = T) or thorough (pretty = F)?
 
+**Note:** [false_pos.R](false_pos.R) also contains all code necessary to generate the figures in this post.
+
 ## 2. Background
 ### 2a. Motivation
 Many research questions involve comparing experimental groups to one another. The Dutch have an international reputation for their height, but is the average person from the Netherlands actually taller than people from, say, France or Sweden? 
