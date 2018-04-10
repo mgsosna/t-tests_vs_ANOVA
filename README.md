@@ -47,17 +47,20 @@ To answer these questions, we can run set ranges on `n_obs` and `n_groups`, then
 
 ![](https://i.imgur.com/9lFNSD5.png)
 
-As we can see, 
+As we can see, t-tests are incredibly sensitive to the number of comparisons you run. As you move to the right of the figure (increasing the number of groups), the false error rate steadily rises until you have around a 70% false error rate when comparing 10 groups. Somewhat surprisingly, increasing the number of observations per group does almost nothing to lower the error rate.
 
+Meanwhile, ANOVAs are resilient: no matter the number of observations or groups, the false error rate hovers around 0.05, where it should be.
 
+## 4. Conclusions
 
-
-## 4. Notes
+## 5. Notes
 1. We use `rnorm` to create each group. The parent population here is infinite. An alternate approach is to create a population that is then sampled from, e.g. the code below. However, this approach is slower, as the population needs to be stored in memory (and if you want to be thorough, a new population needs to be created with every iteration). Also, it becomes a little tedious to write the code to sample without replacement; it's simpler to sample with replacement, but then as you increase `n_obs`, each group begins to represent a substantial percent of the parent population, and the groups begin to have many overlapping values. This then decreases the false error rate because it's literally the same numbers in both groups.
-```
+```r
 population <- rnorm(1e6)
 for(k in 1:n_groups){
     groups[k] <- sample(population, n_obs)
 }
 ```
-2. It would be interesting to see how a permutation test compares to t-tests and ANOVA in its false error rates. A permutation test would involve writing *another* loop for each iteration, however, which would drastically increase computation time. I therefore decided to let someone else handle that one!
+2. You could remove one for loop in the function by generating `n_obs` * `n_groups` random values, then allocating the values into the groups. However, I wanted to emphasize that each group is a separate dataset whose parent populations have equal means. 
+
+3. It would be interesting to see how a permutation test compares to t-tests and ANOVA in its false error rates. A permutation test would involve writing *another* loop for each iteration, however, which would drastically increase computation time. I therefore decided to let someone else handle that one!
