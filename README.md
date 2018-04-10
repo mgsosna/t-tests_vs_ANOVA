@@ -45,7 +45,7 @@ What if we change the number of observations or the number of groups? On the one
 
 To answer these questions, we can run set ranges on `n_obs` and `n_groups`, then run `false_pos` on each combination of the number of groups and observations per group. This will let us know the relative contribution of making more comparisons versus having more data per group. When we do this, we get the heat map below.
 
-![](https://i.imgur.com/9lFNSD5.png)
+![](https://i.imgur.com/2WEeQxj.png)
 
 As we can see, t-tests are incredibly sensitive to the number of comparisons you run. As you move to the right of the figure (increasing the number of groups), the false error rate steadily rises until you have around a 70% false error rate when comparing 10 groups. Somewhat surprisingly, increasing the number of observations per group does almost nothing to lower the error rate.
 
