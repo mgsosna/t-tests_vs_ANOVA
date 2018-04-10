@@ -53,10 +53,11 @@ As we can see,
 
 
 ## 4. Notes
-1. We use `rnorm` to create each group. The parent population here is infinite. An alternate approach is to create a population that is then sampled from, e.g. 
+1. We use `rnorm` to create each group. The parent population here is infinite. An alternate approach is to create a population that is then sampled from, e.g. the code below. However, this approach is slower, as the population needs to be stored in memory (and if you want to be thorough, a new population needs to be created with every iteration). Also, it becomes a little tedious to write the code to sample without replacement; it's simpler to sample with replacement, but then as you increase `n_obs`, each group begins to represent a substantial percent of the parent population, and the groups begin to have many overlapping values. This then decreases the false error rate because it's literally the same numbers in both groups.
 ```
 population <- rnorm(1e6)
 for(k in 1:n_groups){
     groups[k] <- sample(population, n_obs)
 }
 ```
+2. It would be interesting to see how a permutation test compares to t-tests and ANOVA in its false error rates. A permutation test would involve writing *another* loop for each iteration, however, which would drastically increase computation time. I therefore decided to let someone else handle that one!
