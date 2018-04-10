@@ -1,5 +1,16 @@
 # [UNDER CONSTRUCTION]
 # Visualizing the danger of multiple t-test comparisons
+## 1. Abstract
+This repository contains a function for quantifying the false positive error rate with multiple t-tests. For a given number of groups and observations per group, the function creates `n_groups` samples of `n_obs` observations by drawing from the same parent normal distribution. The function then performs an ANOVA and all possible pairwise t-tests. The lowest pairwise t-test p-value and the ANOVA p-value are recorded. This is done `n_iter` times to form a distribution of p-values, which is then plotted if `figure = T`. If `pretty = T`, the proportion of iterations with p-values below 0.05 is printed; otherwise, a list is returned with summary statistics.
+
+The functional arguments are listed below:
+* `n_groups`: the number of groups in the comparison. Default = 3
+* `n_obs`: the number of observations per group. Default = 10
+* `n_iter`: the number of iterations for creating the distribution of p-values. Default = 1000
+* `figure`: should a figure be printed?
+* `pretty`: should the output be simple (pretty = T) or thorough (pretty = F)?
+* `verbose`: should the progress be printed?
+
 ## 1. Background
 ### 1a. Motivation
 Many research questions involve comparing experimental groups to one another. The Dutch have an international reputation for their height, but is the average person from the Netherlands actually taller than people from, say, France or Sweden? 
@@ -17,7 +28,10 @@ A t-test returns a [p-value](https://en.wikipedia.org/wiki/P-value): the probabi
 
 *(The true definition of a p-value is a little more complicated because this is frequentist statistics: assuming the two populations have identical means, if you ran your experiment thousands of times, it's the proportion of samples that would have at least as large a difference in sample means.)*
 
-This all works well for comparing two groups, but when we compare more than two groups, we need to perform an [analysis of variance](https://en.wikipedia.org/wiki/Analysis_of_variance). For our heights example, it can be tempting to run three t-tests: comparing the Dutch heights to French heights, Dutch heights to Swedish heights, and French heights to Swedish heights. This, however, is dangerous: **multiple t-tests inflate the probability of (falsely) declaring that the two population means are different, when they actually aren't.** 
+This all works well for comparing two groups, but when we compare more than two groups, we need to perform an [analysis of variance](https://en.wikipedia.org/wiki/Analysis_of_variance). For our heights example, it can be tempting to run three t-tests: comparing the Dutch heights to French heights, Dutch heights to Swedish heights, and French heights to Swedish heights. This, however, is dangerous: **multiple t-tests inflate the probability of (falsely) declaring that the two population means are different, when they actually aren't.** An ANOVA avoids this problem by restating the question as "are the means of *all* populations equal?"
+
+## 2. Function
+This post
 
 Whenever we run a 
 
