@@ -52,3 +52,11 @@ As we can see,
 
 
 
+## 4. Notes
+1. We use `rnorm` to create each group. The parent population here is infinite. An alternate approach is to create a population that is then sampled from, e.g. 
+```
+population <- rnorm(1e6)
+for(k in 1:n_groups){
+    groups[k] <- sample(population, n_obs)
+}
+```
