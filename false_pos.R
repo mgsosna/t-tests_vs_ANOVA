@@ -19,7 +19,7 @@ install.packages('scales')
 #   o Perform an ANOVA on all groups and record the p-value
 #   o Do this n_iter times to form a distribution
 
-false_pos <- function(n_groups = 3, n_obs = 10, n_iter = 1000, figure = T, 
+false_pos <- function(n_groups = 3, n_obs = 10, n_iter = 1000, p.val = 0.05, figure = T, 
                      verbose = T, pretty = T){
    
    # Create empty variables to store data
@@ -92,22 +92,22 @@ false_pos <- function(n_groups = 3, n_obs = 10, n_iter = 1000, figure = T,
       
       # Display probability of false positives
       cat("\n")
-      cat("% iterations below p = 0.05:\nt-tests: ", 
-          round(sum(t_test_p_vals < 0.05) / n_iter, 3) * 100, " | ANOVA: ",
-          round(sum(anova_p_vals < 0.05) / n_iter, 3) * 100)
+      cat("% iterations below p =", p.val, "\nt-tests:", 
+          round(sum(t_test_p_vals < p.val) / n_iter, 3) * 100, "| ANOVA:",
+          round(sum(anova_p_vals < p.val) / n_iter, 3) * 100)
       cat("\n\n")
    }
    
    if(pretty == F){
-      df <- data.frame("t-tests" = sum(t_test_p_vals < 0.05) / n_iter,
-                       "ANOVA" = sum(anova_p_vals < 0.05) / n_iter)
+      df <- data.frame("t-tests" = sum(t_test_p_vals < p.val) / n_iter,
+                       "ANOVA" = sum(anova_p_vals < p.val) / n_iter)
       
       dists <- data.frame("stat" = names(summary(t_test_p_vals)),
                           "t-test" = as.vector(summary(t_test_p_vals)),
                           "ANOVA" = as.vector(summary(anova_p_vals)))
       
       L <- list(df, dists)
-      names(L) <- c("Prop_iter_p<0.05", "Full")
+      names(L) <- c(paste0("Prop_iter_p<", p.val), "Full")
       
       cat("\n")
       return(L)
@@ -126,10 +126,10 @@ false_pos()
 false_pos(n_obs = 1000)
 
 # 3x n_pop: ~3x increase in false positive rate
-false_pos(n_groups = 6)
+false_pos(n_pop = 6, n_obs = 10)
 
-# Competing effects: n_groups wins
-false_pos(n_groups = 6, n_obs = 1000)
+# Competing effects: n_pop wins
+false_pos(n_pop = 6, n_obs = 1000)
 
 ####################################################################################################
 # Parameter scan
@@ -156,7 +156,7 @@ for(i in 1:length(range_n_groups)){
       cat("Processing: N groups =", range_n_groups[i], "| N observations =", range_n_obs[j])
       
       # Run the comparison
-      values <- false_pos(n_groups = range_n_groups[i], n_obs = range_n_obs[j], 
+      values <- false_pos(n_groups = range_n_groups[i], n_obs = range_n_obs[j], p.val = 0.05,
                           verbose = F, figure = F, pretty = F)[['Prop_iter_p<0.05']]
       
       # Save the values
@@ -167,8 +167,8 @@ for(i in 1:length(range_n_groups)){
    
 }
 
-#---------------------------------------------------------------------------------------------
-#Now actually plot it
+##################################################################################################
+# Plot parameter scan output
 library(lattice)
 library(RColorBrewer)
 library(gridExtra)
@@ -194,3 +194,20 @@ grid.arrange(p1, p2, ncol = 2,
                                gp = gpar(fontsize = 16, font = 2)),
              left = textGrob("\nSample size",
                              gp = gpar(fontsize = 16, font = 2), rot = 90))
+
+#----------------------------------------------------------------------------------------------
+# ANOVA plots
+par(mfrow=c(1,2))
+
+# Density
+plot(density(anova_vals), xlab = "False positive rate", font.axis = 2, font.lab = 2, cex.lab = 1.3,
+     main = "Distribution of ANOVA\n false positive rates", col = "forestgreen", lwd = 3, cex.main = 1.4)
+abline(v = 0.05, lty = 2, lwd = 2)
+
+# Number of groups versus p-value
+plot(NA, xlim = range(range_n_groups), ylim = c(0.045, 0.055), xlab = "Number of groups",
+     ylab = "Mean false positive rate", main = "Number of groups vs.\n mean ANOVA false positive rate", 
+     cex.main = 1.4, cex.lab = 1.3, font.lab = 2, font.axis = 2)
+abline(h = 0.05, lty = 2, lwd = 2)
+points(range_n_groups, apply(anova_vals, 1, mean), cex = 2.5, pch = 19, col = "forestgreen")
+points(range_n_groups, apply(anova_vals, 1, mean), cex = 2.5)
