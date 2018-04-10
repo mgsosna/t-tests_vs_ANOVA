@@ -1,9 +1,9 @@
 # [UNDER CONSTRUCTION]
 # Visualizing the danger of multiple t-test comparisons
 ## 1. Abstract
-This repository contains a function, [false_pos](.../mmgrobis/t-tests_vs_ANOVA/false_pos.R), for quantifying the false positive error rate with multiple t-tests. For a given number of groups and observations per group, the function creates `n_groups` samples from the same (Gaussian) parent distribution, each with `n_obs` observations. Because these samples are drawn from the same population, any differences between them should not be statistically significant (i.e. p > 0.05). 
+This repository contains a function, `false_pos`, for quantifying the false positive error rate with multiple t-tests. For a given number of groups and observations per group, the function creates `n_groups` samples from the same (Gaussian) parent distribution, each with `n_obs` observations. Because these samples are drawn from the same population, any differences between them should not be statistically significant (i.e. p > 0.05). 
 
-The function then performs an ANOVA and all possible pairwise t-tests. The lowest pairwise t-test p-value and the ANOVA p-value are recorded. This is done `n_iter` times to form distributions of p-values for t-tests and ANOVAs, which are then plotted if `figure = T`. If `pretty = T`, the proportion of iterations with p-values below 0.05 is printed; otherwise, a list is returned with summary statistics.
+The function then performs an ANOVA and all possible pairwise t-tests. The lowest pairwise t-test p-value and the ANOVA p-value are recorded. This is done `n_iter` times to form distributions of p-values for t-tests and ANOVAs, which are then plotted if `figure = T`. If `pretty = T`, the proportion of iterations with p-values below `p.val` is printed. (Default is p=0.05, but user can specify other values such as p=0.01). If `pretty = F`, a list is returned with summary statistics.
 
 The functional arguments are listed below:
 * `n_groups`: the number of groups in the comparison
@@ -29,7 +29,7 @@ A commonly-used method for comparing two groups is the **[t-test](https://en.wik
 
 A t-test returns a [p-value](https://en.wikipedia.org/wiki/P-value): the probability, given the two population means are identical, that you'd get your difference in sample means (or greater). This accounts for the variability that sampling introduces into our analysis: yes, our sample means might be different, but of course you'll get some differences between this random group of 50 French people versus the next random group of 50 French people. You'd expect a high p-value when you compare two samples from the same population: the samples are different but the t-test believes they're coming from the same population. If we have a huge difference between samples, though, we would get a low p-value: the t-test believes it's unlikely these samples came from have populations with identical means. 
 
-*(The true definition of a p-value is a little more complicated because this is frequentist statistics: assuming the two populations have identical means, if you ran your experiment thousands of times, it's the proportion of samples that would have at least as large a difference in sample means.)*
+*(The true definition of a p-value is a little more complicated because this is frequentist statistics: assuming the two populations have identical means, if you ran your experiment thousands of times, it's the proportion of samples that would have at least as large a difference in sample means. And also, an obligatory [word of caution](https://www.nature.com/news/statisticians-issue-warning-over-misuse-of-p-values-1.19503) regarding interpreting p-values.)*
 
 This all works well for comparing two groups, but when we compare more than two groups, we need to perform an [analysis of variance](https://en.wikipedia.org/wiki/Analysis_of_variance). For our heights example, it can be tempting to run three t-tests: comparing the Dutch heights to French heights, Dutch heights to Swedish heights, and French heights to Swedish heights. This, however, is dangerous: **multiple t-tests inflate the probability of (falsely) declaring that the two population means are different, when they actually aren't.** An ANOVA avoids this problem by restating the question as "are the means of *all* populations equal?"
 
@@ -57,18 +57,18 @@ Meanwhile, the story is much simpler for ANOVAs: they are resilient. No matter t
 ## 4. Conclusions
 This post demonstrates how performing multiple t-tests between identical groups will produce high false positive rates, whereas ANOVAs successfully maintain accuracy. Note that all an ANOVA is doing is asking whether *any* of the groups being compared have parent populations with different means. Once we've run an ANOVA and determined that there *are* height differences between the Dutch, French, and Swedish, we would then need to use a follow-up method such as [Tukey's method](https://support.minitab.com/en-us/minitab/18/help-and-how-to/modeling-statistics/anova/supporting-topics/multiple-comparisons/what-is-tukey-s-method/) or the [Bonferroni's correction](http://mathworld.wolfram.com/BonferroniCorrection.html).
 
-When we set a threshold of p=0.05, we are accepting the fact that there is a 5% chance we reject our null hypothesis even if it is true. In other words, we would claim that the average Dutch person is taller than the average Swedish or French person, even if they aren't. We can run our analysis again 
+When we set a threshold of p=0.05, we are accepting the fact that there is a 5% chance we reject our null hypothesis even if it is true. In other words, we would claim that the average Dutch person is taller than the average Swedish or French person, even if they aren't. We can run our analysis again with a different p-value threshold and see that our false error rate matches the value we set for `p.val`. Below is the distribution of ANOVA false positive rates when we set `p.val = 0.01`. As we can see, the peak of the distribution is at the p-value threshold.
 
+[](https://i.imgur.com/SCG4gCe.png)
 
-(In fields such as medicine, the accepted p-value threshold is 
+And to answer our original question, **yes, the Dutch apparently *are* the world's tallest people.** [Here](http://www.bbc.com/news/science-environment-36888541) is a summary from BBC on [this article](https://elifesciences.org/articles/13410).
 
+Finally, if you made it this far into the post, enjoy [this xkcd comic](https://xkcd.com/882/) by Randall Monroe, which perfectly describes the problem I tackled here. :-)
 
-
-Finally, if you made it this far into the post and are still confused, [this xkcd comic](https://xkcd.com/882/) by Randall Monroe perfectly describes the problem I tackled here. :-)
-
+[](https://imgs.xkcd.com/comics/significant.png)
 
 ## 5. Notes
-1. We use `rnorm` to create each group. The parent population here is infinite. An alternate approach is to create a population that is then sampled from, e.g. the code below. However, this approach is slower, as the population needs to be stored in memory (and if you want to be thorough, a new population needs to be created with every iteration). Also, it becomes a little tedious to write the code to sample without replacement; it's simpler to sample with replacement, but then as you increase `n_obs`, each group begins to represent a substantial percent of the parent population, and the groups begin to have many overlapping values. This then decreases the false error rate because it's literally the same numbers in both groups.
+1. I use `rnorm` to create each group. The parent population here is infinite. An alternate approach is to create a population that is then sampled from, e.g. the code below. However, this approach is slower, as the population needs to be stored in memory (and if you want to be thorough, a new population needs to be created with every iteration). Also, it becomes a little tedious to write the code to sample without replacement; it's simpler to sample with replacement, but then as you increase `n_obs`, each group begins to represent a substantial percent of the parent population, and the groups begin to have many overlapping values. This then decreases the false error rate because it's literally the same numbers in both groups.
 ```r
 population <- rnorm(1e6)
 for(k in 1:n_groups){
