@@ -7,7 +7,8 @@
 #
 ######################################################################################################
 # Prerequisite: install 'scales' package if necessary
-install.packages('scales')
+try(library(scales),
+    outFile = install.packages('scales'))
 
 #####################################################################################################
 # The function
@@ -171,6 +172,7 @@ for(i in 1:length(range_n_groups)){
 #Now actually plot it
 library(lattice)
 library(RColorBrewer)
+library(grid)
 library(gridExtra)
 
 # Set up color gradient with 10000 values between 0.0 and 0.7
